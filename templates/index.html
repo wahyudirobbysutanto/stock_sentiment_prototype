@@ -1,0 +1,150 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <title>Analisis Sentimen Saham</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="bg-light">
+  <div class="container mt-4 mx-auto" style="max-width: 1000px;">
+    <div class="row">
+      <!-- Kiri: Form Input -->
+      <div class="col-md-4 mb-4">
+        <div class="card shadow-sm">
+          <div class="card-header bg-primary text-white">
+            Input Kode Saham
+          </div>
+          <div class="card-body">
+            <form method="POST">
+              <div class="mb-3">
+                <input type="text" name="stock" class="form-control" placeholder="Contoh: BBRI" required>
+              </div>
+              <button type="submit" class="btn btn-primary w-100">Analisis</button>
+            </form>
+          </div>
+        </div>
+      </div>
+
+      <!-- Kanan: Riwayat -->
+      <div class="col-md-8">
+        <h5>Riwayat Analisis</h5>
+        <form method="get" class="row g-2 mb-3">
+          <div class="col-auto">
+            <input type="date" name="date_filter" class="form-control" value="{{ date_filter }}">
+          </div>
+          <div class="col-auto">
+            <button type="submit" class="btn btn-sm btn-outline-secondary">Filter</button>
+          </div>
+        </form>
+
+        <ul class="list-group shadow-sm">
+          {% for item in history %}
+          <li class="list-group-item d-flex justify-content-between align-items-start">
+            <div class="ms-2 me-auto">
+              <div class="fw-bold">
+                <a href="{{ url_for('detail', caller_id=item.CallerID) }}">
+                  {{ item.Stock }} - {{ item.Date.strftime('%Y-%m-%d') }}
+                </a>
+              </div>
+            </div>
+            {% set sentiment_raw = item.Sentiment|string %}
+            {% set sentiment = sentiment_raw.lower() %}
+            <span class="badge 
+              {% if 'positive' in sentiment %}
+                bg-success
+              {% elif 'negative' in sentiment %}
+                bg-danger
+              {% else %}
+                bg-secondary
+              {% endif %}
+            ">
+              {{ sentiment_raw }}
+            </span>
+          </li>
+          {% endfor %}
+        </ul>
+
+        <!-- Paging -->
+        <div class="d-flex justify-content-between mt-3">
+          {% if page > 1 %}
+            <a href="?page={{ page - 1 }}{% if date_filter %}&date_filter={{ date_filter }}{% endif %}" class="btn btn-outline-secondary btn-sm">← Sebelumnya</a>
+          {% else %}
+            <div></div>
+          {% endif %}
+
+          {% if has_next %}
+            <a href="?page={{ page + 1 }}{% if date_filter %}&date_filter={{ date_filter }}{% endif %}" class="btn btn-outline-secondary btn-sm">Selanjutnya →</a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+
+    <!-- Hasil Analisis -->
+    {% if result %}
+    <div class="row mt-4">
+      <div class="col">
+        <div class="card shadow-sm">
+          <div class="card-header bg-success text-white">
+            Hasil Analisis untuk {{ result.stock }}
+          </div>
+          <div class="card-body">
+            <p><strong>Ringkasan:</strong> {{ result.summary }}</p>
+            {% set sentiment = result.sentiment.lower() %}
+            <p><strong>Sentimen:</strong> 
+              <span class="badge 
+                {% if 'positive' in sentiment %}
+                  bg-success
+                {% elif 'negative' in sentiment %}
+                  bg-danger
+                {% else %}
+                  bg-secondary
+                {% endif %}
+              ">
+                {{ result.sentiment }}
+              </span>
+            </p>
+
+            <h5 class="mt-4">Artikel</h5>
+            <div class="row row-cols-1 row-cols-md-2 g-3">
+              {% for item in result.articles %}
+              <div class="col">
+                <div class="card h-100">
+                  <div class="card-body">
+                    <h6 class="card-title">{{ item.Title }}</h6>
+                    {% set sentiment = item.Sentiment.lower() %}
+                    <p class="card-text">
+                      Sentimen: 
+                      <span class="badge 
+                        {% if 'positive' in sentiment %}
+                          bg-success
+                        {% elif 'negative' in sentiment %}
+                          bg-danger
+                        {% else %}
+                          bg-secondary
+                        {% endif %}
+                      ">
+                        {{ item.Sentiment }}
+                      </span>
+                    </p>
+                    <a href="{{ item.Link }}" class="btn btn-sm btn-outline-primary" target="_blank">Baca Artikel</a>
+                  </div>
+                </div>
+              </div>
+              {% endfor %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
+  </div>
+
+  <script>
+    document.querySelector("form[method='POST']").addEventListener("submit", function(e) {
+      const btn = this.querySelector("button[type='submit']");
+      btn.disabled = true;
+      btn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>Memproses...';
+    });
+  </script>
+</body>
+</html>

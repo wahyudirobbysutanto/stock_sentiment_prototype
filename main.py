@@ -1,11 +1,11 @@
 from scraper import scrape_google_news
 from sentiment import analyze_sentiment, generate_summary
 from db import insert_batch
-from utils import save_to_json
+from utils import save_to_json, clean_gemini_formatting, clean_gemini_formatting
 from collections import Counter
 
-def main(stock):
-    news_list = scrape_google_news(stock, max_articles=3)
+def main(stock, return_result=False):
+    news_list = scrape_google_news(stock, max_articles=5)
 
     if not news_list:
         print("Tidak ada berita ditemukan.")
@@ -29,12 +29,33 @@ def main(stock):
 
     # Ambil bagian ringkasan dan sentimen dari hasil Gemini
     summary_lines = summary_result.splitlines()
+    summary_lines = [clean_gemini_formatting(line) for line in summary_lines]
+
     summary_text = next((line.replace("Ringkasan:", "").strip() for line in summary_lines if "Ringkasan:" in line), "")
     summary_sentiment_ai = next((line.replace("Sentimen:", "").strip().capitalize() for line in summary_lines if "Sentimen:" in line), summary_sentiment)
     
+    # print("---------------------------")
+    # print(summary_lines)
+    # print("---------------------------")
+    # print(summary_text)
+    # print("---------------------------")
+    # print(summary_sentiment_ai)
+    # print("---------------------------")
+
+    summary_text = clean_gemini_formatting(summary_text)
+    summary_sentiment_ai = clean_gemini_formatting(summary_sentiment_ai)
+
     caller_id = insert_batch(news_list, summary_sentiment_ai, summary_text, stock)
     save_to_json(news_list, caller_id, stock)
-    print(f"Berhasil disimpan dengan CallerID #{caller_id}. Summary sentiment: {summary_sentiment_ai}")
+    if return_result:
+        return {
+            "caller_id": caller_id,
+            "stock": stock,
+            "summary": summary_text,
+            "sentiment": summary_sentiment_ai,
+            "articles": news_list
+        }
+    # print(f"Berhasil disimpan dengan CallerID #{caller_id}. Summary sentiment: {summary_sentiment_ai}")
 
 
 if __name__ == "__main__":
