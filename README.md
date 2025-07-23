@@ -96,7 +96,7 @@ GEMINI_API_KEY=your_api_key_here
 
 - Python (Flask, requests, BeautifulSoup, newspaper3k, pyodbc)
 - SQL Server
-- Google Gemini 2.0 Flash (via `google.generativeai`)
+- Google Gemini
 - Bootstrap 5
 
 ## 🧪 Status

@@ -1,4 +1,5 @@
 import google.generativeai as genai
+
 import os
 
 from dotenv import load_dotenv
@@ -59,3 +60,80 @@ Sentimen: ...
     except Exception as e:
         print(f"[WARN] Gagal generate summary: {e}")
         return "Ringkasan: Tidak tersedia\nSentimen: Neutral"
+
+def analyze_sentiment_final(articles: list[str], financial_data) -> str:
+        text = "\n\n".join(articles[:3])  # batasi agar tidak terlalu panjang
+        prompt = f"""
+    Berikut adalah beberapa artikel berita tentang saham:
+
+    \"\"\"
+    {text}
+    \"\"\"
+
+    Dan ini adalah data keuangan saham {financial_data['Stock']}:
+    - Harga: {financial_data['Price']}
+    - PER: {financial_data['PE_Ratio']}
+    - PBV: {financial_data['PB_Ratio']}
+    - ROE: {financial_data['ROE']}
+    - Dividend Yield: {financial_data['DividendYield']}%
+
+    Berdasarkan data diatas, apakah saham ini tergolong Positif, Netral, atau Negatif dari berita dan data keuangan diatas. Balas hanya seperti ini:
+
+    Sentimen: <Positive/Neutral/Negative>
+    Penjelasan: <alasan singkat>
+    """
+
+        try:
+            response = model.generate_content(prompt)
+            sentiment = response.text.strip().capitalize()
+            print("----------------")
+            print(response)
+            print("----------------")
+            
+            print("----------------")
+            print(sentiment)
+            print("----------------")
+
+            return sentiment
+        except Exception as e:
+            print(f"[WARN] Gagal generate summary: {e}")
+            return "Ringkasan: Tidak tersedia\nSentimen: Neutral"
+
+def analyze_sentiment_text(text):
+    # print(text)
+    # print(text["PE_Ratio"])
+
+    prompt = f"""
+    Berikut adalah data keuangan saham {text['Stock']}:
+    - Harga: {text['Price']}
+    - PER: {text['PE_Ratio']}
+    - PBV: {text['PB_Ratio']}
+    - ROE: {text['ROE']}
+    - Dividend Yield: {text['DividendYield']}%
+
+    Berdasarkan data ini, apakah saham ini tergolong Positif, Netral, atau Negatif dari sisi fundamental? Balas hanya seperti ini:
+
+    Sentimen: <Positive/Neutral/Negative>
+    Penjelasan: <alasan singkat>
+    """
+
+    # prompt = f"Berikan sentimen (Positive, Negative, atau Neutral) berdasarkan data keuangan berikut:\n{text}\n\nSentimen:"
+    # print(prompt)
+    try:
+        response = model.generate_content(prompt)
+        sentiment = response.text.strip().capitalize()
+        # print("----------------")
+        # print(response)
+        # print("----------------")
+        
+        # print("----------------")
+        # print(sentiment)
+        # print("----------------")
+        
+        # if sentiment not in ["Positive", "Negative", "Neutral"]:
+        #     return "Neutral"  # fallback aman
+        return sentiment
+    except Exception as e:
+        print(f"[WARN] Gagal analisis sentimen: {e}")
+        return "Neutral"
+

@@ -17,7 +17,7 @@
           <div class="card-body">
             <form method="POST">
               <div class="mb-3">
-                <input type="text" name="stock" class="form-control" placeholder="Contoh: BBRI" required>
+                <input type="text" name="stock" style="text-transform: uppercase;" oninput="this.value = this.value.toUpperCase()" class="form-control" placeholder="Contoh: BBRI" required>
               </div>
               <button type="submit" class="btn btn-primary w-100">Analisis</button>
             </form>
@@ -47,7 +47,7 @@
                 </a>
               </div>
             </div>
-            {% set sentiment_raw = item.Sentiment|string %}
+            {% set sentiment_raw = item.FinalSentiment|string %}
             {% set sentiment = sentiment_raw.lower() %}
             <span class="badge 
               {% if 'positive' in sentiment %}

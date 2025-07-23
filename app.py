@@ -14,7 +14,7 @@ def index():
     if request.method == "POST":
         stock = request.form.get("stock")
         if stock:
-            result = run_analysis(stock, return_result=True)  # proses dan dapatkan hasil
+            result = run_analysis(stock.upper(), return_result=True)  # proses dan dapatkan hasil
 
     # Ambil riwayat selalu (baik GET/POST)
     history, has_next = get_history(limit=5, offset=offset, date_filter=date_filter)

@@ -8,8 +8,8 @@
   <div class="container mt-4">
     <a href="/" class="btn btn-link">← Kembali</a>
     <h3>Detail Analisis: {{ data.summary.Stock }} ({{ data.summary.Date.strftime('%Y-%m-%d') }})</h3>
-    <p><strong>Sentimen:</strong> {{ data.summary.Sentiment }}</p>
-    <p><strong>Ringkasan:</strong> {{ data.summary.Summary }}</p>
+    <p><strong>Sentimen:</strong> {{ data.summary.FinalSentiment }}</p>
+    <p><strong>Ringkasan:</strong> {{ data.summary.FinalSummary }}</p>
 
     <hr>
     <h5>Daftar Artikel</h5>

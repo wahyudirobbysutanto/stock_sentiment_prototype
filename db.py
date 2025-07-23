@@ -1,7 +1,8 @@
 from config import get_connection
 from datetime import datetime
 
-def insert_batch(news_list, summary_sentiment, summary_text, stock_name):
+def insert_batch(news_list, stock_name, NewsSentiment, NewsSentimentSummary,
+                 FundamentalSentiment=None, FundamentalSentimentSummary=None, FinalSentiment=None, FinalSummary=None):
     conn = get_connection()
     cursor = conn.cursor()
 
@@ -16,13 +17,29 @@ def insert_batch(news_list, summary_sentiment, summary_text, stock_name):
               item['Sentiment'], item['Date'], caller_id))
 
     cursor.execute("""
-        INSERT INTO HistorySummary (CallerID, Stock, Sentiment, Summary, Date)
-        VALUES (?, ?, ?, ?, ?)
-    """, (caller_id, stock_name, summary_sentiment, summary_text, datetime.now()))
+        INSERT INTO HistorySummary (
+            CallerID, Stock, 
+            NewsSentiment, NewsSentimentSummary, 
+            FundamentalSentiment, FundamentalSentimentSummary, 
+            FinalSentiment, FinalSummary, 
+            Date
+        )
+        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)
+        """, (
+            caller_id, stock_name, 
+            NewsSentiment, NewsSentimentSummary,
+            FundamentalSentiment, FundamentalSentimentSummary,
+            FinalSentiment, FinalSummary,
+            datetime.now()
+        ))
+
+
+
 
     conn.commit()
     conn.close()
     return caller_id
+
 
 def clean_sentiment_label(sentiment):
     if sentiment and '(' in sentiment:
@@ -35,7 +52,11 @@ def get_history(limit=5, offset=0, date_filter=None):
     cursor = conn.cursor()
 
     sql = """
-        SELECT CallerID, Stock, Sentiment, Summary, Date
+        SELECT CallerID, Stock, 
+            NewsSentiment, NewsSentimentSummary, 
+            FundamentalSentiment, FundamentalSentimentSummary, 
+            FinalSentiment, FinalSummary, 
+            Date
         FROM HistorySummary
     """
     params = []
@@ -51,12 +72,12 @@ def get_history(limit=5, offset=0, date_filter=None):
     rows = cursor.fetchall()
     conn.close()
 
-    columns = ["CallerID", "Stock", "Sentiment", "Summary", "Date"]
+    columns = ["CallerID", "Stock", "NewsSentiment", "NewsSentimentSummary", "FundamentalSentiment", "FundamentalSentimentSummary", "FinalSentiment", "FinalSummary", "Date"]
     # data = [dict(zip(columns, row)) for row in rows]
     data = []
     for row in rows:
         row_dict = dict(zip(columns, row))
-        row_dict["Sentiment"] = clean_sentiment_label(row_dict["Sentiment"])
+        row_dict["NewsSentiment"] = clean_sentiment_label(row_dict["NewsSentiment"])
         data.append(row_dict)
 
 
@@ -70,7 +91,11 @@ def get_history_detail(caller_id):
     cursor = conn.cursor()
 
     cursor.execute("""
-        SELECT Stock, Sentiment, Summary, Date
+        SELECT CallerID, Stock, 
+            NewsSentiment, NewsSentimentSummary, 
+            FundamentalSentiment, FundamentalSentimentSummary, 
+            FinalSentiment, FinalSummary, 
+            Date
         FROM HistorySummary
         WHERE CallerID = ?
     """, (caller_id,))
@@ -86,6 +111,37 @@ def get_history_detail(caller_id):
     conn.close()
 
     return {
-        "summary": dict(zip(["Stock", "Sentiment", "Summary", "Date"], summary)) if summary else None,
+        "summary": dict(zip(["CallerID", "Stock", "NewsSentiment", "NewsSentimentSummary", "FundamentalSentiment", "FundamentalSentimentSummary", "FinalSentiment", "FinalSummary", "Date"], summary)) if summary else None,
         "articles": [dict(zip(["Title", "Link", "Content", "Sentiment"], row)) for row in articles]
     }
+
+
+# def insert_fundamental_data(data):
+#     conn = get_connection()
+#     cursor = conn.cursor()
+
+#     # Pindahkan data lama ke archive jika ada
+#     cursor.execute("SELECT * FROM StockFundamentals WHERE Stock = ?", (data['Stock'],))
+#     old_data = cursor.fetchone()
+#     if old_data:
+#         cursor.execute("""
+#             INSERT INTO StockFundamentalArchive 
+#             (Stock, Price, EPS, BookValue, PE_Ratio, PB_Ratio, ROE, DividendYield, DebtToEquity, IntrinsicValue, MOS, Currency, ArchivedAt)
+#             VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#         """, (*old_data[1:], datetime.now()))
+
+#         cursor.execute("DELETE FROM StockFundamental WHERE Stock = ?", (data['Stock'],))
+
+#     # Simpan data terbaru
+#     cursor.execute("""
+#         INSERT INTO StockFundamentals
+#         (Stock, Price, EPS, BookValue, PE_Ratio, PB_Ratio, ROE, DividendYield, DebtToEquity, IntrinsicValue, MOS, Currency, LastUpdated)
+#         VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+#     """, (
+#         data['Stock'], data['Price'], data['EPS'], data['BookValue'], data['PE_Ratio'], data['PB_Ratio'],
+#         data['ROE'], data['DividendYield'], data['DebtToEquity'], data['IntrinsicValue'], data['MOS'],
+#         data['Currency'], datetime.now()
+#     ))
+
+#     conn.commit()
+#     conn.close()

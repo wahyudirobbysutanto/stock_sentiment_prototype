@@ -10,6 +10,24 @@ def clean_gemini_formatting(text):
     text = re.sub(r'\*{2}([^*]+)\*{2}', r'\1', text)
     return text
 
+import re
+
+def clean_gemini_fundamental_formatting(text):
+    sentiment = ""
+    explanation = ""
+
+    # Cari sentimen (case-insensitive)
+    match_sentiment = re.search(r"sentimen:\s*(\w+)", text, re.IGNORECASE)
+    if match_sentiment:
+        sentiment = match_sentiment.group(1).capitalize()
+
+    # Cari penjelasan (hingga akhir)
+    match_explanation = re.search(r"penjelasan:\s*(.+)", text, re.IGNORECASE)
+    if match_explanation:
+        explanation = match_explanation.group(1).strip()
+
+    return sentiment, explanation
+
 
 def save_to_json(data, caller_id, stock_name):
     os.makedirs("output", exist_ok=True)

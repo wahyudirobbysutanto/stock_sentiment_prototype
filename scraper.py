@@ -34,7 +34,7 @@ def scrape_google_news(stock_name, max_articles=3):
 
     print(f"[INFO] Mencari berita untuk: {stock_name}")
     response = requests.get(url, headers=headers)
-    time.sleep(random.uniform(2, 4))
+    time.sleep(random.uniform(2, 5))
 
     if response.status_code != 200:
         print("[ERROR] Gagal mengambil hasil dari Google. Status code:", response.status_code)
