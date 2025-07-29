@@ -1,79 +1,55 @@
-
 # 📰 Stock News Sentiment Analyzer
 
-Web-based tool untuk menganalisis sentimen berita saham dari berbagai sumber secara otomatis, dibantu AI Gemini. Proyek ini cocok untuk keperluan riset, edukasi, atau monitoring saham berbasis berita.
+A web-based tool to analyze stock news sentiment automatically using Google Gemini AI.  
+This project is designed for research, education, or news-based stock monitoring.
 
-## 🔧 Fitur Utama
+## 🔧 Key Features
 
-- Input kode saham (misalnya: `BBRI`, `TLKM`, `BMRI`)
-- Scraping berita dari hasil pencarian Google (Google News & situs berita populer)
-- Ekstraksi judul, tautan, dan isi artikel dengan `newspaper3k`
-- Analisis sentimen tiap artikel dengan Google Gemini 2.0 Flash
-- Ringkasan otomatis batch berita dengan AI
-- Penyimpanan hasil ke:
-  - **SQL Server** (tabel: `WebsiteData` dan `HistorySummary`)
-  - **File JSON** (backup setiap batch)
-- Antarmuka **Flask Web**:
-  - Form input saham
-  - Riwayat analisis dengan filter tanggal & pagination
-  - Halaman detail untuk melihat isi setiap batch
+- Input any stock ticker (e.g., `BBRI`, `TLKM`, `BMRI`)
+- Scrape recent stock-related news from Google News and popular news websites
+- Extract article titles, links, and content using `readability`
+- Sentiment analysis on each article with **Google Gemini 2.0 Flash**
+- Automatic batch news summarization using AI
+- Save results into:
+  - **SQL Server** (`WebsiteData` and `HistorySummary` tables)
+  - **JSON files** (one file per batch as backup)
+- **Flask Web Interface**:
+  - Stock input form
+  - Analysis history with date filter & pagination
+  - Detail page to inspect every batch
 
-## 📦 Struktur Folder
+## 📦 Project Structure
 
 ```
 project/
 │
 ├── core/
-│   ├── scraper.py          # Scraper berita dan konten
-│   ├── sentiment.py        # Integrasi Gemini
-│   └── utils.py            # Simpan JSON, helper, pembersih teks
+│   ├── scraper.py          # News scraper and content extraction
+│   ├── sentiment.py        # Gemini AI integration
+│   └── utils.py            # JSON helpers, text cleaning utilities
 │
-├── output/                 # Folder JSON hasil scraping
+├── output/                 # JSON files (one per batch)
 │
-├── data/                   # Folder JSON hasil scraping
-│   └── database.sql         # SQL script for database
+├── data/                   
+│   └── database.sql        # SQL schema for the database
 │
 ├── services/
-│   ├── db.py               # Insert dan query data dari SQL Server
-│   └── finance.py          # Get fundamental and insert to database for the fundamental
+│   ├── db.py               # Database operations (SQL Server)
+│   └── finance.py          # Get fundamental data and save to DB
 │
 ├── templates/
-│   ├── index.html          # Halaman utama (form + history)
-│   └── detail.html         # Halaman detail CallerID
+│   ├── index.html          # Home page (form + history)
+│   └── detail.html         # Batch detail page
 │
-├── app.py                  # Entry point Flask
-├── main.py                 # Proses scraping + analisis
-├── config.py               # Koneksi SQL Server (pakai .env)
+├── app.py                  # Flask entry point
+├── main.py                 # Scraping + sentiment pipeline (CLI)
+├── config.py               # SQL Server connection using .env
 │
-├── .env                    # Konfigurasi rahasia (.gitignore!)
+├── .env                    # Secrets and configuration (ignored by git)
 └── requirements.txt
 ```
 
-## 🗃️ Struktur Database (SQL Server)
-
-**Tabel: `WebsiteData`**
-
-| Kolom     | Tipe         | Keterangan                     |
-|-----------|--------------|--------------------------------|
-| Stock     | VARCHAR      | Kode saham (ex: BBRI)          |
-| Title     | VARCHAR      | Judul berita                   |
-| Link      | VARCHAR      | URL asli                       |
-| Content   | TEXT         | Isi artikel                    |
-| Sentiment | VARCHAR      | Hasil analisis per artikel     |
-| Date      | DATETIME     | Tanggal publikasi/scrape       |
-| CallerID  | INT          | ID batch scraping              |
-
-**Tabel: `HistorySummary`**
-
-| Kolom     | Tipe         | Keterangan                     |
-|-----------|--------------|--------------------------------|
-| CallerID  | INT          | ID unik tiap batch             |
-| Stock     | VARCHAR      | Saham                          |
-| Sentiment | VARCHAR      | Ringkasan sentimen batch       |
-| Summary   | TEXT         | Ringkasan isi batch (dari AI)  |
-| Date      | DATETIME     | Tanggal scraping dilakukan     |
-
-## ⚙️ .env (Contoh)
+## ⚙️ Example .env file
 
 ```env
 SQL_SERVER=LAPTOP-XXXX
@@ -82,41 +58,44 @@ USE_WINDOWS_AUTH=true
 GEMINI_API_KEY=your_api_key_here
 ```
 
-## ▶️ Cara Menjalankan
+## ▶️ How to Run
 
-1. Clone repo ini:
-   ```
+1. Clone this repository:
+   ```bash
    git clone https://github.com/wahyudirobbysutanto/stock_sentiment_prototype.git
    ```
 
 2. Install dependencies:
-   ```
+   ```bash
    pip install -r requirements.txt
    ```
 
-3. Jalankan Flask:
-   ```
+3. Run Flask:
+   ```bash
    python app.py
    ```
 
-4. Buka browser di `http://localhost:5000`
+4. Open in your browser:
+   ```
+   http://localhost:5000
+   ```
 
-## 💡 Teknologi yang Digunakan
+## 💡 Tech Stack
 
-- Python (Flask, requests, BeautifulSoup, newspaper3k, pyodbc)
+- Python (Flask, requests, BeautifulSoup, readability-lxml, pyodbc)
 - SQL Server
-- Google Gemini
+- Google Gemini AI
 - Bootstrap 5
 
-## 🧪 Status
+## 🧪 Current Status
 
-✅ Fitur scraping dan analisis AI berjalan  
-✅ UI dasar sudah siap (input + history + detail)  
-🛠️ Masih bisa dikembangkan:
-- Auto-scheduler untuk scraping harian
-- Dukungan multi-saham sekaligus
-- Grafik tren sentimen
+✅ Scraping and AI sentiment analysis implemented  
+✅ Basic UI ready (input form, history, and detail view)  
+🚧 Future improvements:
+- Auto-scheduler for daily scraping
+- Multi-stock batch processing
+- Sentiment trend visualization
 
-## 📜 Lisensi
+## 📜 License
 
-MIT License — silakan digunakan dan dikembangkan sesuai kebutuhan.
+MIT License — free to use and modify.
