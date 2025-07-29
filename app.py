@@ -1,6 +1,6 @@
 from flask import Flask, render_template, request
 from main import main as run_analysis
-from db import get_history, get_history_detail
+from services.db import get_history, get_history_detail
 
 app = Flask(__name__)
 

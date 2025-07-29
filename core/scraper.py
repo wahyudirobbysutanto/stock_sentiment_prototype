@@ -1,9 +1,34 @@
 import requests
 import time
 import random
+import json
+
 from bs4 import BeautifulSoup
 from datetime import datetime
 from readability import Document
+from datetime import datetime
+from pathlib import Path
+
+def get_cached_or_fresh_news(stock_name, max_articles=3):
+    # Nama file cache disimpan di folder "output/" dengan format STOCK_YYYYMMDD.json
+    today = datetime.now().strftime("%Y%m%d")
+    cache_dir = Path("output")
+    cache_dir.mkdir(exist_ok=True)
+    cache_file = cache_dir / f"{stock_name.upper()}_{today}.json"
+
+    if cache_file.exists():
+        print(f"[CACHE] Membaca cache untuk {stock_name} dari {cache_file}")
+        with open(cache_file, "r", encoding="utf-8") as f:
+            return json.load(f)
+    
+    # Jika belum ada cache, lakukan scraping
+    fresh_data = scrape_google_news(stock_name, max_articles=max_articles)
+    if fresh_data:
+        with open(cache_file, "w", encoding="utf-8") as f:
+            json.dump(fresh_data, f, indent=2, ensure_ascii=False)
+        print(f"[CACHE] Data baru disimpan ke {cache_file}")
+    
+    return fresh_data
 
 # Ambil isi artikel dari URL menggunakan readability
 def extract_article_content(url, headers=None):
@@ -34,7 +59,7 @@ def scrape_google_news(stock_name, max_articles=3):
 
     print(f"[INFO] Mencari berita untuk: {stock_name}")
     response = requests.get(url, headers=headers)
-    time.sleep(random.uniform(2, 5))
+    time.sleep(random.uniform(8, 12))
 
     if response.status_code != 200:
         print("[ERROR] Gagal mengambil hasil dari Google. Status code:", response.status_code)
@@ -96,6 +121,6 @@ def scrape_google_news(stock_name, max_articles=3):
             "Date": date_now
         })
 
-        time.sleep(random.uniform(1, 2))  # jeda agar tidak dianggap bot
+        time.sleep(random.uniform(8, 12))  # jeda agar tidak dianggap bot
 
     return results

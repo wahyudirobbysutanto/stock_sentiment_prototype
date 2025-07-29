@@ -23,19 +23,28 @@ Web-based tool untuk menganalisis sentimen berita saham dari berbagai sumber sec
 ```
 project/
 │
-├── app.py                  # Entry point Flask
-├── main.py                 # Proses scraping + analisis
-├── config.py               # Koneksi SQL Server (pakai .env)
-├── scraper.py              # Scraper berita dan konten
-├── sentiment.py            # Integrasi Gemini
-├── db.py                   # Insert dan query data dari SQL Server
-├── utils.py                # Simpan JSON, helper, pembersih teks
+├── core/
+│   ├── scraper.py          # Scraper berita dan konten
+│   ├── sentiment.py        # Integrasi Gemini
+│   └── utils.py            # Simpan JSON, helper, pembersih teks
+│
+├── output/                 # Folder JSON hasil scraping
+│
+├── data/                   # Folder JSON hasil scraping
+│   └── database.sql         # SQL script for database
+│
+├── services/
+│   ├── db.py               # Insert dan query data dari SQL Server
+│   └── finance.py          # Get fundamental and insert to database for the fundamental
 │
 ├── templates/
 │   ├── index.html          # Halaman utama (form + history)
 │   └── detail.html         # Halaman detail CallerID
 │
-├── output/                 # Folder JSON hasil scraping
+├── app.py                  # Entry point Flask
+├── main.py                 # Proses scraping + analisis
+├── config.py               # Koneksi SQL Server (pakai .env)
+│
 ├── .env                    # Konfigurasi rahasia (.gitignore!)
 └── requirements.txt
 ```

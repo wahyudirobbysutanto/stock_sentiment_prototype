@@ -1,13 +1,13 @@
-from scraper import scrape_google_news
-from sentiment import analyze_sentiment, generate_summary, analyze_sentiment_final, analyze_sentiment_text
-from db import insert_batch
-from utils import save_to_json, clean_gemini_formatting, clean_gemini_fundamental_formatting
+from core.scraper import get_cached_or_fresh_news  
+from core.sentiment import analyze_sentiment, generate_summary, analyze_sentiment_final, analyze_sentiment_text
+from services.db import insert_batch
+from core.utils import save_to_json, clean_gemini_formatting, clean_gemini_fundamental_formatting
+from services.finance import get_fundamentals
 from collections import Counter
-from finance import get_fundamentals
 
 
 def main(stock, return_result=False):
-    news_list = scrape_google_news(stock, max_articles=5)
+    news_list = get_cached_or_fresh_news(stock, max_articles=5)
 
     if not news_list:
         print("Tidak ada berita ditemukan.")
